@@ -1,38 +1,86 @@
 import React from "react";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  increaseQuantity,
+  decreaseQuantity,
+  removeFromCart,
+} from "./CartSlice";
+import { Link } from "react-router-dom";
 
-function CartItem() {
-  const cartItems = [
-    { id: 1, name: "Snake Plant", price: 200, quantity: 2 }
-  ];
+const CartItem = () => {
+  const dispatch = useDispatch();
 
+  // Access cart items from Redux store
+  const cartItems = useSelector((state) => state.cart.items);
+
+  // Dynamically calculate total cart amount
   const totalAmount = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
 
   return (
-    <div>
-      <h2>Shopping Cart</h2>
+    <div className="cart-container">
+      <h2>Your Shopping Cart</h2>
 
-      {cartItems.map(item => (
-        <div key={item.id}>
-          <p>{item.name}</p>
-          <p>Unit Price: ₹{item.price}</p>
-          <p>Quantity: {item.quantity}</p>
-          <p>Total: ₹{item.price * item.quantity}</p>
+      {/* Display message if cart is empty */}
+      {cartItems.length === 0 ? (
+        <p>Your cart is empty.</p>
+      ) : (
+        <>
+          {/* Render each cart item */}
+          {cartItems.map((item) => (
+            <div key={item.id} className="cart-item">
+              <img src={item.image} alt={item.name} width="80" />
 
-          <button>+</button>
-          <button>-</button>
-          <button>Delete</button>
-        </div>
-      ))}
+              <div className="cart-details">
+                <h4>{item.name}</h4>
+                <p>Unit Price: ₹{item.price}</p>
+                <p>Total: ₹{item.price * item.quantity}</p>
 
-      <h3>Total Amount: ₹{totalAmount}</h3>
+                {/* Quantity control buttons */}
+                <div className="quantity-controls">
+                  <button
+                    onClick={() => dispatch(decreaseQuantity(item.id))}
+                  >
+                    −
+                  </button>
 
-      <button onClick={() => alert("Coming Soon")}>Checkout</button>
-      <button>Continue Shopping</button>
+                  <span>{item.quantity}</span>
+
+                  <button
+                    onClick={() => dispatch(increaseQuantity(item.id))}
+                  >
+                    +
+                  </button>
+                </div>
+
+                {/* Remove item from cart */}
+                <button
+                  className="delete-btn"
+                  onClick={() => dispatch(removeFromCart(item.id))}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {/* Display dynamically updated cart total */}
+          <h3>Total Amount: ₹{totalAmount}</h3>
+
+          {/* Action buttons */}
+          <button onClick={() => alert("Coming Soon")}>
+            Checkout
+          </button>
+
+          <Link to="/plants">
+            <button>Continue Shopping</button>
+          </Link>
+        </>
+      )}
     </div>
   );
-}
+};
 
 export default CartItem;
